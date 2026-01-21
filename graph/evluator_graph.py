@@ -1,7 +1,5 @@
-import sqlite3
-
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.memory import MemorySaver
 
 from graph.state_schema import Evaluator_State
 
@@ -52,9 +50,7 @@ builder.add_edge(FEEDBACK,HISTORY)
 builder.add_edge(HISTORY,END)
 
 
-# memory = MemorySaver()
-conn = sqlite3.connect("checkpoints.sqlite",check_same_thread=False)
-memory = SqliteSaver(conn)
+memory = MemorySaver()
 
 graph = builder.compile(
     checkpointer=memory,
