@@ -1,6 +1,6 @@
-INPUT = "input"
-TEST = "generate_test"
-HUMAN_FEEDBACK = "HITL_answer"
-EVAL = 'evaluate_answer'
+INPUT_NODE = "input_node"
+GENERATE_QUESTION = "generate_question"
+HITL = "HITL"
+EVALUATE_ANSWER = 'evaluate_answer'
 FEEDBACK = 'feedback'
 HISTORY = 'history'

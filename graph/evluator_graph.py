@@ -1,51 +1,62 @@
+import sqlite3
+
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 from graph.state_schema import Evaluator_State
 
 from graph.nodes import (
-    input,
-    test,
-    human_feedback,
-    eval,
+    input_node,
+    generate_question,
+    hitl,
+    evaluate_answer,
     feedback,
     history,
 )
 
 from graph.constants import (
-    INPUT,
-    TEST,
-    HUMAN_FEEDBACK,
-    EVAL,
+    INPUT_NODE,
+    GENERATE_QUESTION,
+    HITL,
+    EVALUATE_ANSWER,
     FEEDBACK,
     HISTORY,
 )
 
 def should_continue(state: Evaluator_State):
-    if len(state["question"]) > 5:
+    if len(state["questions"]) > 5:
         return FEEDBACK
-    return EVAL
+    return GENERATE_QUESTION
 
 builder = StateGraph(state_schema=Evaluator_State)
-builder.add_node(INPUT,input)
-builder.add_node(TEST,test)
-builder.add_node(HUMAN_FEEDBACK,human_feedback)
-builder.add_node(EVAL,eval)
+builder.add_node(INPUT_NODE,input_node)
+builder.add_node(GENERATE_QUESTION,generate_question)
+builder.add_node(HITL,hitl)
+builder.add_node(EVALUATE_ANSWER,evaluate_answer)
 builder.add_node(FEEDBACK,feedback)
 builder.add_node(HISTORY,history)
 
-builder.set_entry_point(INPUT)
-builder.add_edge(INPUT,TEST)
-builder.add_edge(TEST,HUMAN_FEEDBACK)
-builder.add_edge(HUMAN_FEEDBACK,EVAL)
+builder.set_entry_point(INPUT_NODE)
+builder.add_edge(INPUT_NODE,GENERATE_QUESTION)
+builder.add_edge(GENERATE_QUESTION,HITL)
+builder.add_edge(HITL,EVALUATE_ANSWER)
 builder.add_conditional_edges(
-    EVAL,
+    EVALUATE_ANSWER,
     should_continue,
     path_map = {
-        TEST: TEST,
+        GENERATE_QUESTION: GENERATE_QUESTION,
         FEEDBACK: FEEDBACK,
     }
 )
 builder.add_edge(FEEDBACK,HISTORY)
 builder.add_edge(HISTORY,END)
 
-graph = builder.compile()
+
+# memory = MemorySaver()
+conn = sqlite3.connect("checkpoints.sqlite",check_same_thread=False)
+memory = SqliteSaver(conn)
+
+graph = builder.compile(
+    checkpointer=memory,
+    interrupt_before=[HITL]
+)

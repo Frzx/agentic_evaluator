@@ -218,3 +218,5 @@ __marimo__/
 .chroma
 documents/*
 !documents/.gitkeep
+
+*.sqlite
