@@ -1,7 +1,6 @@
 INPUT = "input"
-TEST = "test"
-HUMAN_FEEDACK = "human_feedback"
-EVAL = 'eval'
+TEST = "generate_test"
+HUMAN_FEEDBACK = "HITL_answer"
+EVAL = 'evaluate_answer'
 FEEDBACK = 'feedback'
 HISTORY = 'history'
-HUMAN_FEEDBACK = "human"
