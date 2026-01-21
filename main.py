@@ -1,6 +1,4 @@
-def main():
-    print("Hello from agentic-evaluator!")
+from graph.evluator_graph import graph
 
-
-if __name__ == "__main__":
-    main()
+async def main():
+    print("STARTING EVALUATOR")
