@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from graph.evluator_graph import graph
 from graph.constants import HITL
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage,AIMessage
 
 load_dotenv()
 
@@ -26,9 +26,14 @@ def main():
 
     snapshot = graph.get_state(THREAD)
     next_node = snapshot.next[0]
-    print("NEXT NODE: ", next_node)
 
     while next_node == HITL:
+        state = graph.get_state(THREAD)
+        # ---- Print AI response ----
+        if state.values["messages"]:
+            last = state.values["messages"][-1]
+            if isinstance(last, AIMessage):
+                print("\nAI:", last.content)
 
         user_answer = input("\nYour answer: ")
 
@@ -45,7 +50,11 @@ def main():
         snapshot = graph.get_state(THREAD)
         
         next_node = snapshot.next[0] if snapshot.next else None
-        print("NEXT NODE: ", next_node)
+
+    state = graph.get_state(THREAD)
+    if state.values["assessment"]:
+        last = state.values["assessment"]
+        print("\nAI:",last)
 
 if __name__ == "__main__":
     main()

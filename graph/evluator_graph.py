@@ -22,7 +22,7 @@ from graph.constants import (
 )
 
 def should_continue(state: Evaluator_State):
-    print(len(state["messages"]))
+    # print(len(state["messages"]))
     if len(state["messages"]) > 2:
         return FEEDBACK
     return GENERATE_QUESTION
