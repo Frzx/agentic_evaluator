@@ -1,9 +1,12 @@
-from typing import TypedDict
+from typing import TypedDict,Annotated
+import operator
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 
 class Evaluator_State(TypedDict):
     subject_background: str
     topic: str
-    questions: list[str]
-    user_answers: list[str]
-    score: list[str]
+    messages: Annotated[list[BaseMessage], add_messages]
+    scores: Annotated[list[float], operator.add]
     assessment: str
