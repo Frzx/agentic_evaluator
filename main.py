@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langgraph.graph.state import CompiledStateGraph    
 
 from graph.evluator_graph import graph
-from graph.constants import HITL, GENERATE_QUESTION, EVALUATE_ANSWER
+from graph.constants import HITL
 from langchain_core.messages import HumanMessage, AIMessage
 
 from core.logging_config import get_dev_logger
@@ -13,24 +13,43 @@ load_dotenv()
 
 logger = get_dev_logger(__name__)
 
+class StreamPrinter:
+    def __init__(self):
+        self.last_msg_id = None
+
+    def consume(self, msg, metadata):
+
+        if not isinstance(msg, AIMessage):
+            return
+
+        # Message boundary → previous message ended
+        if self.last_msg_id and msg.id != self.last_msg_id:
+            print("\n")   # EXACTLY ONE newline
+
+        # New message header
+        if msg.id != self.last_msg_id:
+            print("AI: ", end="", flush=True)
+            self.last_msg_id = msg.id
+
+        print(msg.content, end="", flush=True)
+
+    def close(self):
+        print()
+
 
 def run_graph(
     graph: CompiledStateGraph,
     thread: dict,
-    input_state: dict = None,
+    input_state: dict|None = None,
 ):
-    for state_delta in graph.stream(input=input_state, config=thread, stream_mode="updates"):
-        logger.debug(state_delta)
-
-        if GENERATE_QUESTION in state_delta:
-            last_message = state_delta[GENERATE_QUESTION]["qna"][-1]
-            if isinstance(last_message, AIMessage):
-                print("\nAI:", last_message.content)
-        elif EVALUATE_ANSWER in state_delta:
-            last_message = state_delta[EVALUATE_ANSWER]["evaluations"][-1]
-            if isinstance(last_message, AIMessage):
-                print("\nAI Evaluation:", last_message.content)
-
+    printer = StreamPrinter()
+    for msg, metadata in graph.stream(
+        input=input_state,
+        config=thread,
+        stream_mode="messages",
+    ):
+        logger.debug(msg,metadata)
+        printer.consume(msg,metadata)
 
 def handle_hitl(graph:CompiledStateGraph,thread:dict):
 
