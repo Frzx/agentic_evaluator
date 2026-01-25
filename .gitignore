@@ -220,3 +220,5 @@ documents/*
 !documents/.gitkeep
 
 *.sqlite
+
+temp.py

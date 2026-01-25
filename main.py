@@ -1,21 +1,13 @@
-import logging
-
 from dotenv import load_dotenv
 from graph.evluator_graph import graph
 from graph.constants import HITL
 from langchain_core.messages import HumanMessage,AIMessage
 
-logger = logging.getLogger(name=__name__)
-logger.setLevel(logging.DEBUG)
-
-file_handler = logging.FileHandler(filename="app.log",mode='w',encoding="utf-8")
-log_formatter = logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s")
-file_handler.setFormatter(log_formatter)
-file_handler.setLevel(logging.DEBUG)
-
-logger.addHandler(file_handler)
+from core.logging_config import get_dev_logger
 
 load_dotenv()
+
+logger = get_dev_logger(__name__)
 
 THREAD = {"configurable": {"thread_id": "1"}}
 
