@@ -1,7 +1,18 @@
+import logging
+
 from dotenv import load_dotenv
 from graph.evluator_graph import graph
 from graph.constants import HITL
 from langchain_core.messages import HumanMessage,AIMessage
+
+logger = logging.getLogger(name=__name__)
+logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler(filename="app.log",mode='w',encoding="utf-8")
+log_formatter = logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s")
+file_handler.setFormatter(log_formatter)
+
+logger.addHandler(file_handler)
 
 load_dotenv()
 
@@ -10,19 +21,21 @@ THREAD = {"configurable": {"thread_id": "1"}}
 def main():
     print("=== Learning Evaluator Agent ===")
 
-    topic = input("Enter the topic you want to learn: ")
+    # topic = input("Enter the topic you want to learn: ")
 
     initial_state = {
-        "messages": [],
-        "subject_background": "",
-        "topic": topic,
-        "scores": [],
-        "assessment": ""
+        "qna": [],
+        "subject_background": "Python Developer",
+        "topic": "Deep learning",
+        "evaluations":[],
+        "assessment": "",
     }
 
     # First run # The graph will stop at before HITL NODE
-    for _ in graph.stream(initial_state, THREAD, stream_mode="values"):
-        pass
+    logger.info("Starting graph execution")
+    for event in graph.stream(initial_state, THREAD, stream_mode="values"):
+        logger.debug(event)
+    logger.info("Reached HITL")
 
     snapshot = graph.get_state(THREAD)
     next_node = snapshot.next[0]
@@ -30,8 +43,8 @@ def main():
     while next_node == HITL:
         state = graph.get_state(THREAD)
         # ---- Print AI response ----
-        if state.values["messages"]:
-            last = state.values["messages"][-1]
+        if state.values["qna"]:
+            last = state.values["qna"][-1]
             if isinstance(last, AIMessage):
                 print("\nAI:", last.content)
 
@@ -39,7 +52,7 @@ def main():
 
         graph.update_state(
             THREAD,
-            {"messages": [HumanMessage(content=user_answer)]},
+            {"qna": [HumanMessage(content=user_answer)]},
             as_node=HITL
         )
     
