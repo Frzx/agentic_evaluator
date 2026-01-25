@@ -7,6 +7,6 @@ def evaluate_answer(state: Evaluator_State):
     evaluation = chain.invoke({
         "topic": state["topic"],
         "subject_background": state['subject_background'],
-        "qna": state["qna"]
+        "qna": state["qna"][-2:]
     })
     return {"evaluations": [evaluation]}

@@ -1,10 +1,10 @@
 import uuid
 
 from dotenv import load_dotenv
-from langgraph.graph.state import CompiledStateGraph
+from langgraph.graph.state import CompiledStateGraph    
 
 from graph.evluator_graph import graph
-from graph.constants import HITL
+from graph.constants import HITL, GENERATE_QUESTION, EVALUATE_ANSWER
 from langchain_core.messages import HumanMessage, AIMessage
 
 from core.logging_config import get_dev_logger
@@ -19,21 +19,27 @@ def run_graph(
     thread: dict,
     input_state: dict = None,
 ):
-    for state in graph.stream(input=input_state, config=thread, stream_mode="values"):
-        logger.debug(state)
+    for state_delta in graph.stream(input=input_state, config=thread, stream_mode="updates"):
+        logger.debug(state_delta)
+
+        if GENERATE_QUESTION in state_delta:
+            last_message = state_delta[GENERATE_QUESTION]["qna"][-1]
+            if isinstance(last_message, AIMessage):
+                print("\nAI:", last_message.content)
+        elif EVALUATE_ANSWER in state_delta:
+            last_message = state_delta[EVALUATE_ANSWER]["evaluations"][-1]
+            if isinstance(last_message, AIMessage):
+                print("\nAI Evaluation:", last_message.content)
+
 
 def handle_hitl(graph:CompiledStateGraph,thread:dict):
-    snapshot = graph.get_state(thread)
-    # ---- Print Question ----
-    if snapshot.values["qna"]:
-        last = snapshot.values["qna"][-1]
-        if isinstance(last, AIMessage):
-            print("\nAI:", last.content)
 
     user_answer = input("\nYour answer: ")
 
     graph.update_state(
-        thread, {"qna": [HumanMessage(content=user_answer)]}, as_node=HITL
+        thread, 
+        {"qna": [HumanMessage(content=user_answer)]},
+        as_node=HITL
     )
     logger.info("Updated user answer at HITL")
 
@@ -56,7 +62,6 @@ def main():
     
 
     snapshot = graph.get_state(thread)
-    eval_count = len(snapshot.values["evaluations"])
 
     while snapshot.next and snapshot.next[0] == HITL:
 
@@ -70,13 +75,6 @@ def main():
         logger.info("resuming from HITL node")
         run_graph(graph,thread)
     
-        # print the evaluation
-        snapshot = graph.get_state(thread)
-        if len(snapshot.values["evaluations"]) > eval_count:
-            last = snapshot.values["evaluations"][-1]
-            eval_count = len(snapshot.values["evaluations"])
-            print("\nAI Evaluation: ", last.content)
-
         snapshot = graph.get_state(thread)
 
     logger.info("Reach the end node")
