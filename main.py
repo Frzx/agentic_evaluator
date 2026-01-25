@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langgraph.graph.state import CompiledStateGraph    
 
 from graph.evluator_graph import graph
-from graph.constants import HITL
+from graph.constants import HITL, GENERATE_QUESTION, EVALUATE_ANSWER
 from langchain_core.messages import HumanMessage, BaseMessage
 
 from core.logging_config import get_dev_logger
@@ -23,17 +23,21 @@ class StreamPrinter:
         node = metadata.get("langgraph_node","UNK")
 
         if self.last_node != node:
-            print()
+            print('*')
             self.last_node = node
         elif self.last_msg_id != msg.id:
-            print("\nAI : ", end="", flush=True)
+            print()
+            if node == GENERATE_QUESTION:
+                print("[AI] : ", end="", flush=True)
+            elif node == EVALUATE_ANSWER:
+                print("[AI (evaluation)] : ", end="", flush=True)
             self.last_msg_id = msg.id
             
-        if msg.content:
+        if node in (GENERATE_QUESTION,EVALUATE_ANSWER) and msg.content:
             print(msg.content,end="",flush=True)
 
     def close(self):
-        print()
+        print('')
 
 
 def run_graph(
@@ -47,13 +51,13 @@ def run_graph(
         config=thread,
         stream_mode="messages",
     ):
-        logger.debug(msg,metadata)
+        # logger.debug(msg,metadata)
         printer.consume(msg,metadata)
     printer.close()
 
 def handle_hitl(graph:CompiledStateGraph,thread:dict):
 
-    user_answer = input("\nYour answer: ")
+    user_answer = input("\n[YOU]: ")
 
     graph.update_state(
         thread, 
@@ -99,7 +103,7 @@ def main():
     logger.info("Reach the end node")
     if snapshot.values["feedback"]:
         last = snapshot.values["feedback"].content
-        print("\nAI:", last)
+        print("\n[AI (feedback)]:", last)
 
 
 if __name__ == "__main__":

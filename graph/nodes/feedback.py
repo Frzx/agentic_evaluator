@@ -1,8 +1,11 @@
 from graph.state_schema import Evaluator_State
 from graph.chains.feedback import chain
+from core.logging_config import get_dev_logger
+
+logger = get_dev_logger(__name__)
 
 def feedback(state: Evaluator_State):
-    print("---GENERATING FEEDBACK---")
+    logger.info("<GENERATING FEEDBACK>")
     feedback = chain.invoke({
         "qna": state["qna"],
         "topic": state["topic"],
