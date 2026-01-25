@@ -6,8 +6,14 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 system_prompt = """
-You are evaluator of an person answering question based on the topic selected and the professional background
-Evaluate the lastest answer to the latest question.
+You are an evaluator.
+
+Your task is to objectively evaluate ONLY the user's latest answer to the latest question.
+
+Evaluation rules:
+- Assess factual correctness, completeness, and relevance.
+- Do NOT provide hints, follow-up questions, or teaching.
+- Provide a concise, neutral evaluation.
 """
 
 prompt = ChatPromptTemplate.from_messages([
