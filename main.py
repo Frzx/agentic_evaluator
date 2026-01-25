@@ -5,7 +5,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from graph.evluator_graph import graph
 from graph.constants import HITL
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, BaseMessage
 
 from core.logging_config import get_dev_logger
 
@@ -16,22 +16,21 @@ logger = get_dev_logger(__name__)
 class StreamPrinter:
     def __init__(self):
         self.last_msg_id = None
+        self.last_node = None
 
-    def consume(self, msg, metadata):
+    def consume(self, msg: BaseMessage, metadata: dict):
 
-        if not isinstance(msg, AIMessage):
-            return
+        node = metadata.get("langgraph_node","UNK")
 
-        # Message boundary → previous message ended
-        if self.last_msg_id and msg.id != self.last_msg_id:
-            print("\n")   # EXACTLY ONE newline
-
-        # New message header
-        if msg.id != self.last_msg_id:
-            print("AI: ", end="", flush=True)
+        if self.last_node != node:
+            print()
+            self.last_node = node
+        elif self.last_msg_id != msg.id:
+            print("\nAI : ", end="", flush=True)
             self.last_msg_id = msg.id
-
-        print(msg.content, end="", flush=True)
+            
+        if msg.content:
+            print(msg.content,end="",flush=True)
 
     def close(self):
         print()
@@ -50,6 +49,7 @@ def run_graph(
     ):
         logger.debug(msg,metadata)
         printer.consume(msg,metadata)
+    printer.close()
 
 def handle_hitl(graph:CompiledStateGraph,thread:dict):
 
