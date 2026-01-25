@@ -2,7 +2,7 @@ import logging
 
 from dotenv import load_dotenv
 from graph.evluator_graph import graph
-from graph.constants import HITL, EVALUATE_ANSWER
+from graph.constants import HITL
 from langchain_core.messages import HumanMessage,AIMessage
 
 logger = logging.getLogger(name=__name__)
@@ -22,14 +22,14 @@ THREAD = {"configurable": {"thread_id": "1"}}
 def main():
     print("=== Learning Evaluator Agent ===")
 
-    # topic = input("Enter the topic you want to learn: ")
+    topic = input("Enter the topic you want to learn: ")
 
     initial_state = {
         "qna": [],
         "subject_background": "Python Developer",
-        "topic": "Deep learning",
+        "topic": topic,
         "evaluations":[],
-        "assessment": "",
+        "feedback": "",
     }
 
     # First run # The graph will stop at before HITL NODE
@@ -81,8 +81,8 @@ def main():
         next_node = snapshot.next[0] if snapshot.next else None
 
     snapshot = graph.get_state(THREAD)
-    if snapshot.values["assessment"]:
-        last = snapshot.values["assessment"]
+    if snapshot.values["feedback"]:
+        last = snapshot.values["feedback"].content
         print("\nAI:",last)
 
 if __name__ == "__main__":

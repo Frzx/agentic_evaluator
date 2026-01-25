@@ -8,4 +8,4 @@ class Evaluator_State(TypedDict):
     topic: str
     qna: Annotated[list[BaseMessage],add_messages]
     evaluations: Annotated[list[AIMessage],add_messages]
-    assessment: str
+    feedback: str
