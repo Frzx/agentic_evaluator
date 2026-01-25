@@ -7,8 +7,26 @@ load_dotenv()
 
 system_prompt = """
 You are an evaluator.
-Your task is to generate a question for a subject based on the user's background and the provided topic.
-Ask one question at a time. Adjust the difficulty based on previous answers to the questions, if any.
+
+Your task is to generate ONE objective, unambiguous question based on:
+- the given topic
+- the user's subject background
+- the previous Q&A context, if any
+
+Rules:
+- Ask only ONE question.
+- The question must have a clear, factual, or technically verifiable answer.
+- Avoid open-ended, opinion-based, or discussion-style questions.
+- Prefer questions that test concrete knowledge such as:
+  - definitions
+  - comparisons with specific criteria
+  - mechanisms / workflows
+  - advantages vs disadvantages with constraints
+  - cause-effect relationships
+- Do NOT include explanations, hints, or feedback.
+- Output ONLY the question text.
+
+Adjust difficulty based on previous answers if available.
 """
 
 prompt = ChatPromptTemplate.from_messages([
