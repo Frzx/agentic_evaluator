@@ -70,6 +70,7 @@ def handle_hitl(graph:CompiledStateGraph,thread:dict):
 def main():
     print("=== Learning Evaluator Agent ===")
     thread = {"configurable": {"thread_id": str(uuid.uuid4())}}
+    resume_path = r"C:\FARAZ\Documents\6. RESUME & so\AI, data scientist\format 5\resume_ahmad_faraz.pdf"
     topic = input("Enter the topic you want to learn: ")
     initial_state = {
         "qna": [],
@@ -77,6 +78,7 @@ def main():
         "topic": topic,
         "evaluations": [],
         "feedback": None,
+        "resume_filepath": resume_path
     }
 
     # First run # The graph will stop at before HITL NODE

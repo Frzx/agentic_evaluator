@@ -9,3 +9,4 @@ class Evaluator_State(TypedDict):
     qna: Annotated[list[BaseMessage],add_messages]
     evaluations: Annotated[list[AIMessage],add_messages]
     feedback: AIMessage
+    resume_filepath: str
