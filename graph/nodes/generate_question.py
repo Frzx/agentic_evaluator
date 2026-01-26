@@ -1,8 +1,8 @@
 from graph.state_schema import Evaluator_State
 from graph.chains.generate_question import chain
-from core.logging_config import get_dev_logger
+from core.logger import AppLogger
 
-logger = get_dev_logger(__name__)
+logger = AppLogger(__name__)
 
 def generate_question(state: Evaluator_State):
     logger.info("<GENERATING QUESTION>")

@@ -7,11 +7,11 @@ from graph.evluator_graph import graph
 from graph.constants import HITL, GENERATE_QUESTION, EVALUATE_ANSWER
 from langchain_core.messages import HumanMessage, BaseMessage
 
-from core.logging_config import get_dev_logger
+from core.logger import AppLogger
 
 load_dotenv()
 
-logger = get_dev_logger(__name__)
+logger = AppLogger(__name__)
 
 class StreamPrinter:
     def __init__(self):
@@ -23,7 +23,7 @@ class StreamPrinter:
         node = metadata.get("langgraph_node","UNK")
 
         if self.last_node != node:
-            print('*')
+            print()
             self.last_node = node
         elif self.last_msg_id != msg.id:
             print()
@@ -83,7 +83,6 @@ def main():
     logger.info("Starting graph execution")
     run_graph(graph,thread,initial_state)
     
-
     snapshot = graph.get_state(thread)
 
     while snapshot.next and snapshot.next[0] == HITL:
@@ -100,7 +99,7 @@ def main():
     
         snapshot = graph.get_state(thread)
 
-    logger.info("Reach the end node")
+    logger.info("Reached the end node")
     if snapshot.values["feedback"]:
         last = snapshot.values["feedback"].content
         print("\n[AI (feedback)]:", last)

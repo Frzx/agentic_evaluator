@@ -1,7 +1,7 @@
 from graph.state_schema import Evaluator_State
-from core.logging_config import get_dev_logger
+from core.logger import AppLogger
 
-logger = get_dev_logger(__name__)
+logger = AppLogger(__name__)
 
 def hitl(state: Evaluator_State):
     logger.info("<HITL>")
