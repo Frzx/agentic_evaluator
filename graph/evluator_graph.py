@@ -55,5 +55,4 @@ memory = MemorySaver()
 
 graph = builder.compile(
     checkpointer=memory,
-    interrupt_before=[HITL]
 )

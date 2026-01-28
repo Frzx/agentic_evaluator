@@ -70,7 +70,7 @@ def handle_hitl(graph:CompiledStateGraph,thread:dict):
 def main():
     print("=== Learning Evaluator Agent ===")
     thread = {"configurable": {"thread_id": str(uuid.uuid4())}}
-    resume_path = r"C:\FARAZ\Documents\6. RESUME & so\AI, data scientist\format 5\resume_ahmad_faraz.pdf"
+    resume_path = "./documents/resume.pdf"
     topic = input("Enter the topic you want to learn: ")
     initial_state = {
         "qna": [],
