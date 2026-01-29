@@ -14,6 +14,7 @@ logger = AppLogger(__name__)
 
 stream_url = "http://localhost:8000/stream"
 async def reply(payload):
+    isInterrupted = False
     async with httpx.AsyncClient() as client:
         async with client.stream("POST",stream_url,json=payload,timeout=None) as response:
             async for line in response.aiter_lines():
@@ -30,7 +31,9 @@ async def reply(payload):
                 if event["type"] == "token":
                     print(event["content"],end="",flush=True)
                 elif event["type"] == "hitl":
-                    break
+                    isInterrupted = True
+            
+    return isInterrupted
 
 
 
@@ -48,18 +51,22 @@ async def main():
     }
     while True:
         print("[AI]: ",end="")
-        await reply(payload)
+        isInterrupted = await reply(payload)
         print("\n")
-        user_input = input("[You]: ")
-        print("\n")
-        payload = {
-            "thread_id": thread_id,
-            "user_id": user_id,
-            "user_answer": user_input,
-        }
+        if isInterrupted:
+            user_input = input("[You]: ")
+            print("\n")
+            payload = {
+                "thread_id": thread_id,
+                "user_id": user_id,
+                "user_answer": user_input,
+            }
+        else:
+            print("Finished")
+            break
 
 
 
 if __name__ == "__main__":
-    # start t: uv run uvicorn service.service:app --reload
+    # start streaming service: uv run uvicorn service.service:app --reload
     asyncio.run(main())
